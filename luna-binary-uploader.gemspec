@@ -22,8 +22,7 @@ Gem::Specification.new do |spec|
   # spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
   #   `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   # end
-  spec.files = `git ls-files`.split("
-    ")
+  spec.files = `git ls-files`.split("\n")
 
   spec.bindir        = "bin"
   spec.executables << 'lbu'
@@ -35,5 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'cocoapods-imy-bin','0.3.1.3'
   spec.add_dependency "cocoapods-generate",'~>2.0.1'
   spec.add_runtime_dependency('gli','2.19.0')
-  spec.require_paths = ["lib"]
+  spec.require_paths = "lib"
 end
