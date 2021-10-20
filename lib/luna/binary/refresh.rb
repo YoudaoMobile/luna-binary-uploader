@@ -21,15 +21,15 @@ module Luna
                             if pathArr != nil
                                 Pod::UserInterface.puts "#{pathArr.first} #{k}".yellow
                                 srcPath = File.dirname(pathArr.first)
-                                File.rename(srcPath, "#{rootPath}/#{k}")
-                                system "cp -r #{srcPath} #{rootPath}; "
+                                system "cp -r #{srcPath} #{rootPath};"
+                                File.rename("#{rootPath}/#{File.basename(srcPath)}", "#{rootPath}/#{k}")
                                 zipCommand = "cd #{rootPath};zip -r #{k}.zip #{k}"
                                 p zipCommand
                                 system zipCommand
-                                Luna::Binary::Delete.new(k,v).deleteBinaryFramework
-                                command = "cd #{rootPath};curl #{CBin.config.binary_upload_url} -F \"name=#{k}\" -F \"version=#{v}\" -F \"annotate=#{k}_#{v}_log\" -F \"file=@#{k}.zip\""
-                                p command 
-                                system command
+                                # Luna::Binary::Delete.new(k,v).deleteBinaryFramework
+                                # command = "cd #{rootPath};curl #{CBin.config.binary_upload_url} -F \"name=#{k}\" -F \"version=#{v}\" -F \"annotate=#{k}_#{v}_log\" -F \"file=@#{k}.zip\""
+                                # p command 
+                                # system command
                             end 
                         rescue => exception
                             p exception
