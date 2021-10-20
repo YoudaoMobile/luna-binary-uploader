@@ -41,7 +41,7 @@ module Luna
                                                     uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binary_path)
                                                     uploader.specification=Pod::Specification.from_file(pathArr.first)
                                                     uploader.specificationWork
-                                                    localPathMapper[moduleName] = pathArr.first
+                                                    successList<<uploader
                                                 end
                                                 
                                             elsif gitURL && tag && !moduleName["/"]
@@ -75,6 +75,7 @@ module Luna
                 } 
 
                 successList.each { |item|
+                    Pod::UserInterface.puts "#{item} 制作中".yellow
                     item.upload
                 }
                 p "exception:#{failList}"
