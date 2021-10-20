@@ -7,3 +7,8 @@
 /spec/reports/
 /tmp/
 Gemfile.lock
+Podfile
+Podfile.lock
+temp-luna-uploader/
+vendor/
+Embed/

@@ -27,6 +27,7 @@ module Luna
                   end
                 }
                 if repoPath == nil
+                  p '没找到repo路径'
                   raise '没找到repo路径'  
                 end
                 return repoPath
