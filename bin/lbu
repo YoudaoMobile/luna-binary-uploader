@@ -6,7 +6,6 @@ require "luna/binary/delete"
 require "luna/binary/analysis"
 require "luna/binary/refresh"
 require "luna/binary/build"
-require "luna/binary/DSL/uploader_DSL"
 require 'gli'
 
 # You can add fixtures and/or initialization code here to make experimenting
