@@ -5,9 +5,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["车德超"]
   spec.email         = ["chedechao333@163.com"]
 
-  spec.summary       = 'asdds'
-  spec.description   = 'afds'
-  spec.homepage      = 'https://github.com/YoudaoMobile/DictFlutterCommand.git'
+  spec.summary       = '词典上传二进制控件'
+  spec.description   = '词典上传二进制控件'
+  spec.homepage      = 'https://github.com/YoudaoMobile/luna-binary-uploader'
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
