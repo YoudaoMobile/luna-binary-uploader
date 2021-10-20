@@ -111,7 +111,7 @@ class App
         else
           obj.binary_path = Luna::Binary::Common.instance.binary_path_merged
         end
-        obj.needUpload = args[1]
+        obj.need_upload = args[1]
         obj.run
       end
     end
