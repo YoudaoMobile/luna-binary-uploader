@@ -14,6 +14,7 @@ module Luna
                 Luna::Binary::Common.instance.deleteDirectory("#{rootPath}")
                 system "mkdir -p #{rootPath};"
                 failList = []
+                successList = []
                 dependenciesMapper = lockfile.dependencies.map { |item| [item.name, item]}.to_h
                 spec_repo_binary.each { |k,v|
                     if request_result_hash[k] == nil || request_result_hash[k].include?(v) == false
@@ -34,7 +35,16 @@ module Luna
                                             tag = lockItem.external_source['tag'.parameterize.underscore.to_sym]
                                             path = lockItem.external_source['path'.parameterize.underscore.to_sym]
                                             p "#{moduleName} git: #{gitURL} tag: #{tag} path: #{path}"
-                                            if gitURL && tag && !moduleName["/"]
+                                            if path
+                                                pathArr = Dir.glob("#{Dir.pwd}/#{path}/**/#{moduleName}.podspec")
+                                                if pathArr 
+                                                    uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binary_path)
+                                                    uploader.specification=Pod::Specification.from_file(pathArr.first)
+                                                    uploader.specificationWork
+                                                    localPathMapper[moduleName] = pathArr.first
+                                                end
+                                                
+                                            elsif gitURL && tag && !moduleName["/"]
                                                 uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, gitURL, tag, binary_path)
                                                 uploader.specificationWork
                                                 successList << uploader

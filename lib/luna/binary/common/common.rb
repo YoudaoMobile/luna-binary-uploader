@@ -90,8 +90,7 @@ module Luna
             end
 
             def lockfile
-              @lockfile ||= begin
-                  Pod::Lockfile.from_file(podFilePath) if podFilePath.exist?
+              @lockfile ||= Pod::Lockfile.from_file(podFilePath) if podFilePath.exist?
             end
 
             def use_framework_list
@@ -108,18 +107,6 @@ module Luna
                 end
               return list
             end
-            
-
-
-            
-
-          end
-          
-            # def pushInRepo(name, version)
-              
-              
-            # end
-
         end    
     end
 end
