@@ -94,6 +94,27 @@ module Luna
               @lockfile ||= Pod::Lockfile.from_file(podFilePath) if podFilePath.exist?
             end
 
+            def request_result_hash
+              command = "curl #{CBin.config.binary_upload_url}"
+              p command
+              result = %x(#{command})
+              request_result_hash = JSON.parse(result)
+              p request_result_hash
+              return request_result_hash
+          end
+          
+          def createNeedFrameworkMapper
+              spec_repo_binary = {}
+              Pod::UserInterface.puts "二进制repo地址 : #{CBin.config.binary_repo_url}".yellow
+              Luna::Binary::Common.instance.use_framework_list.each { |item|
+                  name = item.split('/').first
+                  if spec_repo_binary[name] == nil
+                      spec_repo_binary[name] = lockfile.version(name).version
+                  end
+              }    
+              return spec_repo_binary
+          end
+
             def use_framework_list
               list = []
               File.open(Dir.pwd+"/Podfile", 'r:utf-8') do  |f|
