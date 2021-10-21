@@ -120,13 +120,14 @@ module Luna
               File.open(Dir.pwd+"/Podfile", 'r:utf-8') do  |f|
                   f.each_line do |item|
                       if item[":dev_env_use_binary"]
-                          matchs = item.match(/pod \'([\u4E00-\u9FA5A-Za-z0-9_-]+)\'/)
+                          matchs = item.match(/\'(?<=').*?(?=')\'/)
                           if matchs != nil
-                              list << matchs[1]
+                              list << matchs[0].gsub("'", "")
                           end
                       end
                   end
                 end
+              p "use_framework_list: #{list}"
               return list
             end
         end    
