@@ -27,6 +27,7 @@ module Luna
                 isNext = true
                 Pod::UserInterface.puts "请将二进制开关关闭，确保每个模块都是源码运行，因为二进制的因素有可能source缓存还是会引入二进制".yellow
                 command("rm -rf #{Dir.pwd}/Pods")
+
                 isNext = command("pod install")
                 Luna::Binary::Common.instance.deleteDirectory(binary_path_arm)
                 tempLunaUploaderPath = Luna::Binary::Common.instance.tempLunaUploaderPath
@@ -74,7 +75,8 @@ module Luna
     
             def mergeFrameWork(moduleName, path1, path2)
                 command("mkdir -p #{binary_path_merged}; cp -r #{File.dirname(path1)} #{binary_path_merged}; mv #{binary_path_merged}/#{File.basename(File.dirname(path1))} #{binary_path_merged}/#{moduleName};")
-                return command("lipo -create #{path2}/#{moduleName} #{path1}/#{moduleName} -output #{binary_path_merged}/#{moduleName}/#{moduleName}.framework/#{moduleName}")
+                command("lipo -create #{path2}/#{moduleName} #{path1}/#{moduleName} -output #{binary_path_merged}/#{moduleName}/#{moduleName}.framework/#{moduleName}")
+                command("cp -r #{path2}/Modules/#{moduleName}.swiftmodule  #{binary_path_merged}/#{moduleName}/#{moduleName}.framework/Modules")
             end
     
             def findFramework(moduleName, binary_path)
