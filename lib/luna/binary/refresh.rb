@@ -37,12 +37,12 @@ module Luna
                       failList << "name: #{k} #{v} 在服务不存在"
                     end 
                 } 
-                puts "重新上传的名单".yellow
+                puts "-=-=-=-=-=-=-=-=重新上传的名单-=-=-=-=-=-=-=-=".yellow
                 successList.each { |item|
                     puts item.green
                 }
 
-                puts "失败的名单".yellow
+                puts "-=-=-=-=-=-=-=-=失败的名单-=-=-=-=-=-=-=-=".yellow if failList.length > 0
                 failList.each { |item|
                     puts item.red
                 }

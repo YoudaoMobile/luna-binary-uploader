@@ -51,7 +51,11 @@ module Luna
                             puts item.yellow
                             armPath = findFramework(item,binary_path_arm)
                             x86Path = findFramework(item,binary_path_x86)
-                            mergeFrameWork(item, armPath, x86Path) if armPath != nil && x86Path != nil
+
+                            is_merge = mergeFrameWork(item, armPath, x86Path) if armPath != nil && x86Path != nil
+                            trasher_path = "#{Common.instance.tempLunaUploaderPath}/trasher"
+                            failList << "#{item} 存在问题，已搬到#{trasher_path}" if is_merge == false
+                            command("mkdir #{trasher_path}; mv #{binary_path_merged}/#{item} #{trasher_path}") if is_merge == false
                             dedupingMapper[item] = item
                         rescue => exception
                             failList << "#{item} exception : #{exception}"
@@ -63,7 +67,10 @@ module Luna
                 }
                 
                 puts "合并后的framework的路径为:#{binary_path_merged}".green
-                puts "失败的名单为:#{failList}".red
+                puts "-=-=-=-=-=-=-=-=merge 失败名单-=-=-=-=-=-=-=-=-=-=" if failList.length > 0
+                failList.each { |item|
+                    puts item.red
+                }
             end
 
             def lockfile
@@ -76,9 +83,9 @@ module Luna
             end
     
             def mergeFrameWork(moduleName, path1, path2)
-                command("mkdir -p #{binary_path_merged}; cp -r #{File.dirname(path1)} #{binary_path_merged}; mv #{binary_path_merged}/#{File.basename(File.dirname(path1))} #{binary_path_merged}/#{moduleName};")
-                command("lipo -create #{path2}/#{moduleName} #{path1}/#{moduleName} -output #{binary_path_merged}/#{moduleName}/#{moduleName}.framework/#{moduleName}")
-                command("cp -r #{path2}/Modules/#{moduleName}.swiftmodule  #{binary_path_merged}/#{moduleName}/#{moduleName}.framework/Modules")
+                command("mkdir -p #{binary_path_merged}; cp -r #{File.dirname(path1)} #{binary_path_merged}; cp -r #{File.dirname(path2)} #{binary_path_merged}; mv #{binary_path_merged}/#{File.basename(File.dirname(path1))} #{binary_path_merged}/#{moduleName};")
+                framework_name = moduleName.gsub("-", "_")
+                return command("lipo -create #{path2}/#{framework_name} #{path1}/#{framework_name} -output #{binary_path_merged}/#{moduleName}/#{framework_name}.framework/#{framework_name}")
             end
     
             def findFramework(moduleName, binary_path)

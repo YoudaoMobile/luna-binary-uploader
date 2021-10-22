@@ -38,7 +38,7 @@ module Luna
                     item.upload
                 }
 
-                puts "-=-=-=-=-=-=-=-=update 失败-=-=-=-=-=-=-=-=-=-=".yellow if failList.length > 0
+                puts "-=-=-=-=-=-=-=-=update 失败名单-=-=-=-=-=-=-=-=-=-=".yellow if failList.length > 0
                 failList.each {|item|
                     puts item.red
                 }
