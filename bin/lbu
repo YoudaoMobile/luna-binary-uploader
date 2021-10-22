@@ -7,6 +7,8 @@ require "luna/binary/analysis"
 require "luna/binary/refresh"
 require "luna/binary/build"
 require "luna/binary/update"
+require "luna/binary/install"
+require "luna/binary/init"
 require 'gli'
 
 # You can add fixtures and/or initialization code here to make experimenting
@@ -54,6 +56,33 @@ class App
       end
     end
   
+    desc '初始化二进制配置repo代码'
+    arg_name 'url地址'
+    command :init do |c|
+      c.action do |global_options,options,args|
+        if args[0]
+          Luna::Binary::Init.new(args[0])
+        else
+          raise "添加url地址"
+        end
+      end
+    end
+
+
+    desc '对pod install封装，一键开关二进制'
+    arg_name '只接参数n, 表示不用二进制 '
+    command :install do |c|
+      c.action do |global_options,options,args|
+        is_open = "false"
+        if args[0] && args[0] != "n"
+          raise "只接参数n, 表示不用二进制"
+        else
+          is_open = "true"
+        end
+        Luna::Binary::Install.new(is_open)     
+      end
+    end
+
     desc '单个上传二进制文件'
     arg_name '1.模块名 git地址 git节点 xcode编译的缓存地址 \n 2.模块名 版本号 xcode编译的缓存地址 \n 3.模块名 本地podspec地址 xcode编译的缓存地址'
     command :single do |c|

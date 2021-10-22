@@ -25,7 +25,7 @@ module Luna
           @gitUrl = gitUrl
           @gitNode = gitNode
           @binaryPath = binaryPath
-          @rootName = Luna::Binary::Common.instance.tempLunaUploaderPath + "/temp/#{podspecName}/"
+          @rootName = Common.instance.tempLunaUploaderPath + "/temp/#{podspecName}/"
           validate!
         end
 
@@ -104,7 +104,7 @@ module Luna
         end
 
         def command(c)
-          return Luna::Binary::Common.instance.command(c)
+          return Common.instance.command(c)
         end
 
         def push
@@ -364,7 +364,7 @@ module Luna
 
         
         def repoPath
-          return Luna::Binary::Common.instance.repoPath
+          return Common.instance.repoPath
         end
 
         def isHasSpecInRepo
@@ -413,17 +413,17 @@ module Luna
         def clearTempFile
           p rootName
           begin
-            Luna::Binary::Common.instance.deleteDirectory("#{rootName}bin-json") 
+            Common.instance.deleteDirectory("#{rootName}bin-json") 
           rescue => exception
             
           ensure
             begin
-              Luna::Binary::Common.instance.deleteDirectory("#{rootName}#{podspecName}.zip")
+              Common.instance.deleteDirectory("#{rootName}#{podspecName}.zip")
             rescue => exception
               
             ensure
               begin
-                Luna::Binary::Common.instance.deleteDirectory("#{rootName}#{podspecName}")
+                Common.instance.deleteDirectory("#{rootName}#{podspecName}")
               rescue => exception
                 
               ensure

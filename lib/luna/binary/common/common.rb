@@ -106,7 +106,7 @@ module Luna
           def createNeedFrameworkMapper
               spec_repo_binary = {}
               puts "二进制repo地址 : #{CBin.config.binary_repo_url}".yellow
-              Luna::Binary::Common.instance.use_framework_list.each { |item|
+              use_framework_list.each { |item|
                   name = item.split('/').first
                   if spec_repo_binary[name] == nil
                       spec_repo_binary[name] = lockfile.version(name).version
@@ -132,7 +132,6 @@ module Luna
           end
 
           def create_upload_lockitem(lockItem, moduleName, binary_path)
-            p "hello #{lockItem}"
             if lockItem.external_source == nil
               uploader = uploadLintPodSpec(moduleName, lockItem.specific_version, binary_path) 
               if uploader != nil
@@ -147,15 +146,13 @@ module Luna
               if path
                   pathArr = Dir.glob("#{Dir.pwd}/#{path}/**/#{moduleName}.podspec")
                   if pathArr 
-                      uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binary_path)
+                      uploader = Uploader::SingleUploader.new(moduleName, "", "", binary_path)
                       uploader.local_path = pathArr.first
-                      # uploader.specificationWork
                       return uploader
                   end
                   
               elsif gitURL && tag && !moduleName["/"]
-                  uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, gitURL, tag, binary_path)
-                  # uploader.specificationWork
+                  uploader = Uploader::SingleUploader.new(moduleName, gitURL, tag, binary_path)
                   return uploader
               end
             end
@@ -186,9 +183,9 @@ module Luna
                     uploader = uploadLintPodSpec(moduleName, lockfile.version(moduleName), binary_path) 
                     if uploader != nil
                         if is_refresh
-                          loader.refresh_specification_work
+                          uploader.refresh_specification_work
                         else
-                          loader.specificationWork
+                          uploader.specificationWork
                         end
                         return uploader
                     end
@@ -205,7 +202,7 @@ module Luna
             if set 
                 pathArr = set.specification_paths_for_version(specificVersion)
                 if pathArr.length > 0
-                    uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binaryPath)
+                    uploader = Uploader::SingleUploader.new(moduleName, "", "", binaryPath)
                     uploader.specification=Pod::Specification.from_file(pathArr.first)
                     # uploader.specificationWork
                 end
