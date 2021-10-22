@@ -9,39 +9,51 @@ module Luna
             attr_accessor :request_result_hash
 
             def run 
-                spec_repo_binary = createNeedFrameworkMapper
-                rootPath = "#{Luna::Binary::Common.instance.tempLunaUploaderPath}/refresh"
-                Luna::Binary::Common.instance.deleteDirectory("#{rootPath}")
-                system "mkdir -p #{rootPath};"
+                spec_repo_binary = Luna::Binary::Common.instance.createNeedFrameworkMapper
+                dependencies_mapper = Luna::Binary::Common.instance.dependenciesMapper
                 failList = []
+                successList = []
                 spec_repo_binary.each { |k,v|
                     if request_result_hash[k] != nil && request_result_hash[k].include?(v)
                         begin
-                            pathArr = Dir.glob("#{binary_path}/**/#{k.sub("-","_")}.framework")
-                            if pathArr != nil
-                                Pod::UserInterface.puts "#{pathArr.first} #{k}".yellow
-                                srcPath = File.dirname(pathArr.first)
-                                system "cp -r #{srcPath} #{rootPath};"
-                                File.rename("#{rootPath}/#{File.basename(srcPath)}", "#{rootPath}/#{k}")
-                                zipCommand = "cd #{rootPath};zip -r #{k}.zip #{k}"
-                                p zipCommand
-                                system zipCommand
-                                Luna::Binary::Delete.new(k,v).deleteBinaryFramework
-                                command = "cd #{rootPath};curl #{CBin.config.binary_upload_url} -F \"name=#{k}\" -F \"version=#{v}\" -F \"annotate=#{k}_#{v}_log\" -F \"file=@#{k}.zip\""
-                                p command 
-                                system command
-                            end 
-                        rescue => exception
-                            p exception
-                            failList << "#{k} #{exception}"
-                        else
+                            puts "#{k} #{v}".yellow
                             
-                        end
+                            uploader = Luna::Binary::Common.instance.upload_lockitem(dependencies_mapper,k ,binary_path, true)
+                            if uploader != nil
+                                Luna::Binary::Delete.new(k,v).delete
+                                puts "#{k} #{v} 重新制作上传".yellow
+                                uploader.upload
+                                successList << "#{k} #{v}"
+                            else
+                                failList << "#{k} #{v} 失败，请确保在非二进制状态下"
+                            end
+        
+                        rescue => exception
+                            failList << "#{k} #{v} exception:#{exception}"
+                        ensure
+                            
+                        end                        
                     else   
-                      failList << "name: #{k}"
+                      failList << "name: #{k} #{v} 在服务不存在"
                     end 
                 } 
-                p "exception:#{failList}"
+                puts "重新上传的名单".yellow
+                successList.each { |item|
+                    puts item.green
+                }
+
+                puts "失败的名单".yellow
+                failList.each { |item|
+                    puts item.red
+                }
+            end
+
+            def in_framework_service(dependencies_mapper, name, version)
+                 dependency = dependencies_mapper[name]
+                if lockfile.dependencies_mappe
+                else
+                    
+                end
             end
 
             def lockfile 
@@ -54,10 +66,7 @@ module Luna
                 end
                 return @request_result_hash
             end
-            
-            def createNeedFrameworkMapper
-                return Luna::Binary::Common.instance.createNeedFrameworkMapper
-            end
+        
         end 
     end
 end

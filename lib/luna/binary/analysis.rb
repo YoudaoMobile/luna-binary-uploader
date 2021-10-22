@@ -31,77 +31,47 @@ module Luna
         end
 
         def run
-            
             failList = []
             successList = []
-            localPathMapper = {}
     
-            dependenciesMapper = lockfile.dependencies.map { |item| [item.name, item]}.to_h
+            dependenciesMapper = Luna::Binary::Common.instance.dependenciesMapper
             dedupingMapper = {}
             lockfile.pod_names.each { |item|
                     moduleName = item.split('/').first
                     if !moduleName["/"] && dedupingMapper[moduleName] == nil
                         dedupingMapper[moduleName] = moduleName
-                        Pod::UserInterface.puts moduleName.yellow
-                        if dependenciesMapper[moduleName]
-                            lockContent = lockfile.dependencies_to_lock_pod_named(moduleName)
-                            if lockContent  #dependencies 应该拿不到所有的spec的依赖，我理解只能拿到podfile里面标明的,词典碰到dependency 没有bonmot的情况
-                                lockContent.each { |lockItem|
-                                    begin
-                                        if lockItem.external_source == nil
-                                            uploader = uploadLintPodSpec(moduleName, lockItem.specific_version, binary_path) 
-                                            if uploader != nil
-                                                successList << uploader
-                                            end
-                                        else 
-                                            p lockItem.external_source
-                                            gitURL = lockItem.external_source['git'.parameterize.underscore.to_sym]
-                                            tag = lockItem.external_source['tag'.parameterize.underscore.to_sym]
-                                            path = lockItem.external_source['path'.parameterize.underscore.to_sym]
-                                            p "#{moduleName} git: #{gitURL} tag: #{tag} path: #{path}"
-                                            if path
-                                                pathArr = Dir.glob("#{Dir.pwd}/#{path}/**/#{moduleName}.podspec")
-                                                if pathArr 
-                                                    uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binary_path)
-                                                    uploader.specification=Pod::Specification.from_file(pathArr.first)
-                                                    uploader.specificationWork
-                                                    localPathMapper[moduleName] = pathArr.first
-                                                end
-                                                
-                                            elsif gitURL && tag && !moduleName["/"]
-                                                uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, gitURL, tag, binary_path)
-                                                uploader.specificationWork
-                                                successList << uploader
-                                            end
-                                        end
-                                    rescue => exception
-                                        failList << exception
-                                    ensure
-                                        
-                                    end
-                                }   
+                        puts moduleName.yellow
+                        begin
+                            uploader = Luna::Binary::Common.instance.upload_lockitem(dependenciesMapper, moduleName, binary_path)
+                            if uploader != nil
+                                successList << uploader
+                            else
+                                failList << "#{moduleName} 为空"
                             end
-                        else
-                            begin
-                                uploader = uploadLintPodSpec(moduleName, lockfile.version(moduleName), binary_path) 
-                                if uploader != nil
-                                    successList << uploader
-                                end
-                            rescue => exception
-                                failList << exception
-                            ensure
-                                
-                            end
+                            
+                        rescue => exception
+                            failList << "#{moduleName} exception: #{exception}"
+                        ensure
+                            
                         end
                     end
             }
-            p "-=-=-=-=-=-=-=-=-=-=-=-命令生成=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            puts "-=-=-=-=-=-=-=-=-=-=-=-打印错误信息=-=-=-=-=-=-=-=-=-=-=-=-=-=".yellow if failList.length > 0
+            puts "请查看下时候存在影响，如怀疑程序错误请联系作者".yellow if failList.length > 0
+            failList.each{ |item|
+                puts item.red
+            }
+
+            puts "-=-=-=-=-=-=-=-=-=-=-=-命令生成=-=-=-=-=-=-=-=-=-=-=-=-=-=".yellow
             hasInCocopodsSpec = []
             externalSpec = []
+            local_spec = []
             failPrint = []
         
             successList.each { |item|
-                if item.gitUrl.length > 0
+                if item.local_path
+                    local_spec << item
+                elsif item.gitUrl.length > 0
                     externalSpec << item
                 else
                     hasInCocopodsSpec << item
@@ -111,8 +81,7 @@ module Luna
                 begin
                     item.printPreUploadCommand
                 rescue => exception
-                    # p exception
-                    failPrint << "#{exception}"
+                    failPrint << "#{item.podspecName} exception: #{exception}"
                 ensure
                     
                 end   
@@ -121,52 +90,45 @@ module Luna
                 begin
                     item.printPreUploadCommand
                 rescue => exception
-                    # p exception
-                    failPrint << "#{exception}"
+                    failPrint << "#{item.podspecName} exception: #{exception}"
                 ensure
                     
                 end 
             }
 
-            localPathMapper.each { |k,v|
-                p "lbu single #{k} #{v} #{binary_path}"
+            local_spec.each { |item|
+                begin
+                    item.printPreUploadCommand
+                rescue => exception
+                    failPrint << "#{item.podspecName} exception: #{exception}"
+                ensure
+                    
+                end 
             }
 
-            p "-=-=-=-=-=-=-=-=-=-=-=-命令生成end=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            p "错误信息:#{failPrint}"
-            execUpload(hasInCocopodsSpec)
-            execUpload(externalSpec)
-        end
+            puts "-=-=-=-=-=-=-=-=-=-=-=-命令生成end=-=-=-=-=-=-=-=-=-=-=-=-=-=".yellow
 
-        def findLintPodspec(moduleName)
-            return Luna::Binary::Common.instance.findLintPodspec(moduleName) 
-        end
+            failPrint.each{ |item|
+                puts item.red
+            }
 
-        def uploadLintPodSpec(moduleName, specificVersion, binaryPath) 
-            set = findLintPodspec(moduleName)
-            if set 
-                pathArr = set.specification_paths_for_version(specificVersion)
-                if pathArr.length > 0
-                    uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binaryPath)
-                    uploader.specification=Pod::Specification.from_file(pathArr.first)
-                    uploader.specificationWork
-                end
-            end
-            return uploader
+            execUpload(successList)
         end
-
+        
         def execUpload(items)
             if need_upload != nil && need_upload == "upload"
+                puts "-=-=-=-=-=-=-=-=-=-=-=-开始上传=-=-=-=-=-=-=-=-=-=-=-=-=-=".yellow
                 items.each { |item|
                     begin
                         item.upload
                     rescue => exception
-                        p "异常上传过程中出现了:#{exception}"
+                        puts "异常上传过程中出现了:#{exception}".red
                     else
                         
                     end
                     
                 }
+                puts "-=-=-=-=-=-=-=-=-=-=-=-上传结束=-=-=-=-=-=-=-=-=-=-=-=-=-=".yellow
             end
         end
 

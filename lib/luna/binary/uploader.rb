@@ -18,13 +18,14 @@ module Luna
         attr_reader :rootName
         attr_reader :podspecName
         attr_accessor :specification
+        attr_accessor :local_path
 
         def initialize(podspecName, gitUrl, gitNode, binaryPath)
           @podspecName = podspecName
           @gitUrl = gitUrl
           @gitNode = gitNode
           @binaryPath = binaryPath
-          @rootName = Luna::Binary::Common.instance.tempLunaUploaderPath + "/#{podspecName}/"
+          @rootName = Luna::Binary::Common.instance.tempLunaUploaderPath + "/temp/#{podspecName}/"
           validate!
         end
 
@@ -44,9 +45,16 @@ module Luna
           if @specification != nil
             return @specification
           end
-          puts "#{rootName + "**/#{podspecName}.podspec"}"
-          podspecPathArr =  Dir.glob(rootName + "**/#{podspecName}.podspec")
-          puts "#{podspecPathArr}"
+          if local_path 
+            puts "#{local_path}"
+            podspecPathArr =  Dir.glob(local_path)
+            puts "#{podspecPathArr}"
+          else
+            puts "#{rootName + "**/#{podspecName}.podspec"}"
+            podspecPathArr =  Dir.glob(rootName + "**/#{podspecName}.podspec")
+            puts "#{podspecPathArr}"
+          end
+         
           if podspecPathArr.length == 1
             podspecPath = podspecPathArr[0]
             p "模块路径为" + podspecPath
@@ -63,11 +71,7 @@ module Luna
           rescue => exception
           
           ensure
-            if gitUrl && gitUrl.length > 0
-              command = "git clone #{gitUrl} #{@rootName}temp; cd #{@rootName}temp; git fetch --all;git stash; git checkout #{gitNode};"
-              p command
-              result = system command
-            end
+            download_git
             
             if isHasSpecInRepo == false && isHasFrameworkInService == false
               @spec = createFrameworkSpec
@@ -76,6 +80,31 @@ module Luna
               raise "已存在repo or 二进制服务 #{specification.name} #{specification.version}"
             end
           end
+        end
+
+        def refresh_specification_work
+          begin
+            clearTempFile
+          rescue => exception
+          
+          ensure
+            download_git
+            
+            if isHasSpecInRepo == true && isHasFrameworkInService == true
+              @spec = createFrameworkSpec
+              write_spec_file(@spec)
+            else
+              raise "repo or 二进制服务 不存在 #{specification.name} #{specification.version}"
+            end
+          end
+        end
+
+        def download_git
+          command("git clone #{gitUrl} #{@rootName}temp; cd #{@rootName}temp; git fetch --all;git stash; git checkout #{gitNode};") if gitUrl && gitUrl.length > 0
+        end
+
+        def command(c)
+          return Luna::Binary::Common.instance.command(c)
         end
 
         def push
@@ -88,11 +117,13 @@ module Luna
         end
 
         def printPreUploadCommand
-          if isLocalHasFramework && isLocalHasPodSpec 
-            if gitUrl && gitUrl.length == 0
-              Pod::UserInterface.puts "lbu single #{podspecName} #{specification.version} #{binaryPath}"  
+          if isLocalHasFramework && isLocalHasPodSpec
+            if local_path
+              puts "lbu single #{podspecName} #{local_path} #{binaryPath}".green  
+            elsif gitUrl && gitUrl.length == 0
+              puts "lbu single #{podspecName} #{specification.version} #{binaryPath}" .green   
             else
-              Pod::UserInterface.puts "lbu single #{podspecName} #{gitUrl} #{gitNode} #{binaryPath}"
+              puts "lbu single #{podspecName} #{gitUrl} #{gitNode} #{binaryPath}".green  
             end
           else
             raise "#{specification.name} #{specification.version} repo或framework缺失"
@@ -140,7 +171,7 @@ module Luna
           bundlePaths = Dir.glob("#{binaryPath}/**/#{specification.root.name}.bundle")
           if bundlePaths.length > 1
             # raise "findBundle:#{bundlePaths},不知道取哪个" 
-            Pod::UserInterface.puts "findBundle:#{bundlePaths},不知道取哪个，做合并"
+            puts "findBundle:#{bundlePaths},不知道取哪个，做合并"
           end
           bundlePaths.each { |item|
             system "cp -r #{item} #{moduleDirPath}"
