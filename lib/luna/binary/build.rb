@@ -20,7 +20,7 @@ module Luna
             end
 
             def command(c)
-                return Luna::Binary::Common.instance.command(c)
+                return Common.instance.command(c)
             end
 
             def createFrameworks
@@ -29,18 +29,18 @@ module Luna
                 command("rm -rf #{Dir.pwd}/Pods")
 
                 isNext = command("pod install")
-                Luna::Binary::Common.instance.deleteDirectory(binary_path_arm)
-                tempLunaUploaderPath = Luna::Binary::Common.instance.tempLunaUploaderPath
+                Common.instance.deleteDirectory(binary_path_arm)
+                tempLunaUploaderPath = Common.instance.tempLunaUploaderPath
                 isNext = command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug -derivedDataPath '#{tempLunaUploaderPath}/build/arm/temp'") if isNext == true
                 isNext = command("cp -r #{tempLunaUploaderPath}/build/arm/temp/Build/Products/Debug-iphoneos #{binary_path_arm}") if isNext == true #本可以用CONFIGURATION_BUILD_DIR直接指定结果文件夹，结果经常性的编译报错
-                Luna::Binary::Common.instance.deleteDirectory(binary_path_x86)
+                Common.instance.deleteDirectory(binary_path_x86)
                 isNext = command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug -derivedDataPath '#{tempLunaUploaderPath}/build/x86/temp' -destination 'platform=iOS Simulator,name=iPhone 11'") if isNext == true
                 isNext = command("cp -r #{tempLunaUploaderPath}/build/x86/temp/Build/Products/Debug-iphonesimulator #{binary_path_x86}") if isNext == true
                 mergeFrameWorks(binary_path_arm, binary_path_x86) if isNext == true
             end
     
             def mergeFrameWorks(binary_path_arm, binary_path_x86)
-                Luna::Binary::Common.instance.deleteDirectory(binary_path_merged)
+                Common.instance.deleteDirectory(binary_path_merged)
                 dedupingMapper = {}
                 failList = []
                 p lockfile.pod_names
@@ -74,7 +74,7 @@ module Luna
             end
 
             def lockfile
-                return Luna::Binary::Common.instance.lockfile
+                return Common.instance.lockfile
             end
     
             def xcodeSimulators
@@ -99,15 +99,15 @@ module Luna
     
     
             def binary_path_merged
-                return Luna::Binary::Common.instance.binary_path_merged
+                return Common.instance.binary_path_merged
             end
     
             def binary_path_arm
-                return Luna::Binary::Common.instance.binary_path_arm
+                return Common.instance.binary_path_arm
             end
     
             def binary_path_x86
-                return Luna::Binary::Common.instance.binary_path_x86
+                return Common.instance.binary_path_x86
             end
         end
     end

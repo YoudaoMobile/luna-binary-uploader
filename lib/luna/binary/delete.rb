@@ -33,10 +33,10 @@ module Luna
             end
 
             def deleteRepo
-                command = "cd #{Luna::Binary::Common.instance.repoPath}; git stash;git checkout master;git pull origin master;"
+                command = "cd #{Common.instance.repoPath}; git stash;git checkout master;git pull origin master;"
                 system command
-                Luna::Binary::Common.instance.deleteDirectory("#{Luna::Binary::Common.instance.repoPath}/#{name}/#{version}")
-                commandADD = "cd #{Luna::Binary::Common.instance.repoPath};git add .; git commit -m 'DEL::#{name}-#{version} by LBU'; git push -f origin master"
+                Common.instance.deleteDirectory("#{Common.instance.repoPath}/#{name}/#{version}")
+                commandADD = "cd #{Common.instance.repoPath};git add .; git commit -m 'DEL::#{name}-#{version} by LBU'; git push -f origin master"
                 system commandADD
             end
 

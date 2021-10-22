@@ -20,21 +20,21 @@ module Luna
         end
 
         def validate!
-            arr = Dir.glob(Luna::Binary::Common.instance.podFilePath)
+            arr = Dir.glob(Common.instance.podFilePath)
             if arr == nil 
                 raise '当前路径下没有Podfile'
             end
         end
 
         def lockfile
-            return Luna::Binary::Common.instance.lockfile
+            return Common.instance.lockfile
         end
 
         def run
             failList = []
             successList = []
     
-            dependenciesMapper = Luna::Binary::Common.instance.dependenciesMapper
+            dependenciesMapper = Common.instance.dependenciesMapper
             dedupingMapper = {}
             lockfile.pod_names.each { |item|
                     moduleName = item.split('/').first
@@ -42,7 +42,7 @@ module Luna
                         dedupingMapper[moduleName] = moduleName
                         puts moduleName.yellow
                         begin
-                            uploader = Luna::Binary::Common.instance.upload_lockitem(dependenciesMapper, moduleName, binary_path)
+                            uploader = Common.instance.upload_lockitem(dependenciesMapper, moduleName, binary_path)
                             if uploader != nil
                                 successList << uploader
                             else
@@ -133,7 +133,7 @@ module Luna
         end
 
         def command(c)
-            return Luna::Binary::Common.instance.command(c)
+            return Common.instance.command(c)
         end
 
     end

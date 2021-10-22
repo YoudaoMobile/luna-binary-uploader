@@ -9,8 +9,8 @@ module Luna
             attr_accessor :request_result_hash
 
             def run 
-                spec_repo_binary = Luna::Binary::Common.instance.createNeedFrameworkMapper
-                dependencies_mapper = Luna::Binary::Common.instance.dependenciesMapper
+                spec_repo_binary = Common.instance.createNeedFrameworkMapper
+                dependencies_mapper = Common.instance.dependenciesMapper
                 failList = []
                 successList = []
                 spec_repo_binary.each { |k,v|
@@ -18,9 +18,9 @@ module Luna
                         begin
                             puts "#{k} #{v}".yellow
                             
-                            uploader = Luna::Binary::Common.instance.upload_lockitem(dependencies_mapper,k ,binary_path, true)
+                            uploader = Common.instance.upload_lockitem(dependencies_mapper,k ,binary_path, true)
                             if uploader != nil
-                                Luna::Binary::Delete.new(k,v).delete
+                                Delete.new(k,v).delete
                                 puts "#{k} #{v} 重新制作上传".yellow
                                 uploader.upload
                                 successList << "#{k} #{v}"
@@ -57,12 +57,12 @@ module Luna
             end
 
             def lockfile 
-                return Luna::Binary::Common.instance.lockfile
+                return Common.instance.lockfile
             end
 
             def request_result_hash
                 if @request_result_hash == nil
-                    @request_result_hash = Luna::Binary::Common.instance.request_result_hash
+                    @request_result_hash = Common.instance.request_result_hash
                 end
                 return @request_result_hash
             end
