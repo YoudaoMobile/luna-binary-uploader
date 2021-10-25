@@ -94,20 +94,18 @@ module Luna
                 normal_time_arr.each { |item|
                     item.print
                     sum_time += item.delta
-                    p sum_time
                     i += 1
                 }
 
-                puts "normal average time: #{sum_time/i}"
+                puts "normal average time: #{sum_time/i}" if sum_time > 0
                 i = 0
                 sum_time = 0
                 binary_time_arr.each { |item|
                     item.print
                     sum_time += item.delta
-                    p sum_time
                     i += 1
                 }
-                puts "binary average time: #{sum_time/i}"
+                puts "binary average time: #{sum_time/i}" if sum_time > 0
             end
         end
 
