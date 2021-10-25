@@ -1,14 +1,7 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-require "luna/binary/uploader"
-require "luna/binary/delete"
-require "luna/binary/analysis"
-require "luna/binary/refresh"
-require "luna/binary/build"
-require "luna/binary/update"
-require "luna/binary/install"
-require "luna/binary/init"
+require "luna-binary-uploader"
 require 'gli'
 
 # You can add fixtures and/or initialization code here to make experimenting
