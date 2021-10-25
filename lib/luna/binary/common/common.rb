@@ -14,7 +14,12 @@ module Luna
             attr_accessor :version, :state
             attr_accessor :podFilePath
             attr_accessor :lockfile
-            
+            attr_reader :bin_dev
+            attr_reader :binary_repo_url
+            attr_reader :binary_upload_url
+            attr_reader :binary_download_url
+            attr_reader :download_file_type
+          
             def initialize()
             end
 
@@ -22,7 +27,7 @@ module Luna
                 sources = Pod::Config.instance.sources_manager.all
                 repoPath = nil
                 sources.each { |item|
-                  if item.url == CBin.config.binary_repo_url
+                  if item.url == Common.instance.binary_repo_url
                     repoPath = item.repo
                   end
                 }
@@ -95,7 +100,7 @@ module Luna
             end
 
             def request_result_hash
-              command = "curl #{CBin.config.binary_upload_url}"
+              command = "curl #{Common.instance.binary_upload_url}"
               p command
               result = %x(#{command})
               request_result_hash = JSON.parse(result)
@@ -105,7 +110,7 @@ module Luna
           
           def createNeedFrameworkMapper
               spec_repo_binary = {}
-              puts "二进制repo地址 : #{CBin.config.binary_repo_url}".yellow
+              puts "二进制repo地址 : #{Common.instance.binary_repo_url}".yellow
               use_framework_list.each { |item|
                   name = item.split('/').first
                   if spec_repo_binary[name] == nil
@@ -212,6 +217,42 @@ module Luna
 
           def dependenciesMapper
             return lockfile.dependencies.map { |item| [item.name.split("/").first, item]}.to_h
+          end
+
+          def bin_dev
+            if @bin_dev == nil
+              @bin_dev = YAML.load_file("#{Pod::Config.instance.home_dir}/bin_dev.yml")
+            end
+            return @bin_dev
+          end
+
+          def binary_repo_url
+            if @binary_repo_url == nil
+                @binary_repo_url = bin_dev["binary_repo_url"]
+            end
+            return @binary_repo_url
+          end
+
+          def binary_upload_url
+            if @binary_upload_url == nil
+              cut_string = "/%s/%s/zip"
+              @binary_upload_url =  binary_download_url[0,binary_download_url.length - cut_string.length]
+            end
+            return @binary_upload_url
+          end
+
+          def binary_download_url
+            if @binary_download_url == nil
+              @binary_download_url = bin_dev["binary_download_url"]
+            end
+            return @binary_download_url
+          end
+
+          def download_file_type
+            if @download_file_type == nil
+              @download_file_type = bin_dev["download_file_type"]
+            end
+            return @download_file_type
           end
 
         end    

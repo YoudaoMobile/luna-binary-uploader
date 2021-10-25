@@ -41,7 +41,7 @@ module Luna
             end
 
             def deleteBinaryFramework 
-                command = "curl -X 'DELETE' #{CBin.config.binary_upload_url}/#{name}/#{version}"
+                command = "curl -X 'DELETE' #{Common.instance.binary_upload_url}/#{name}/#{version}"
                 p command 
                 system command
             end

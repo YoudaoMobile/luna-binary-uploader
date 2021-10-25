@@ -17,7 +17,7 @@ module Luna
 
             def run
                  Common.instance.command("curl -o #{Pod::Config.instance.home_dir}/bin_dev.yml #{url}")
-                 Common.instance.command("pod repo add z-ios-framework-spec-repo #{CBin.config.binary_repo_url}")
+                 Common.instance.command("pod repo add z-ios-framework-spec-repo #{Common.instance.binary_repo_url}")
             end
 
         end

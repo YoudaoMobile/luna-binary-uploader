@@ -322,7 +322,7 @@ module Luna
         end
 
         def binary_source
-          { http: format(CBin.config.binary_download_url, specification.root.name, specification.version), type: CBin.config.download_file_type }
+          { http: format(Common.instance.binary_download_url, specification.root.name, specification.version), type: Common.instance.download_file_type }
         end
 
         def source_files(suffix)
@@ -385,7 +385,7 @@ module Luna
         end
 
         def isHasFrameworkInService
-          command = "curl #{format(CBin.config.binary_download_url, specification.root.name, specification.version).sub("#{CBin.config.download_file_type}","")}"
+          command = "curl #{format(Common.instance.binary_download_url, specification.root.name, specification.version).sub("#{Common.instance.download_file_type}","")}"
           p command
           result = %x(#{command})
           resultHash = JSON.parse(result)
@@ -405,7 +405,7 @@ module Luna
           zipCommand = "cd #{rootName};zip -r #{specification.root.name}.zip #{specification.root.name}"
           p zipCommand
           system zipCommand
-          command = "cd #{rootName};curl #{CBin.config.binary_upload_url} -F \"name=#{specification.root.name}\" -F \"version=#{specification.version}\" -F \"annotate=#{specification.root.name}_#{specification.version}_log\" -F \"file=@#{specification.root.name}.zip\""
+          command = "cd #{rootName};curl #{Common.instance.binary_upload_url} -F \"name=#{specification.root.name}\" -F \"version=#{specification.version}\" -F \"annotate=#{specification.root.name}_#{specification.version}_log\" -F \"file=@#{specification.root.name}.zip\""
           p command 
           system command
         end
