@@ -21,7 +21,7 @@ require 'gli'
 class App
     extend GLI::App
   
-    program_desc 'luna cocopods-imy-bin自定义二进制上传'
+    program_desc 'luna-binary-uploader 自定义二进制上传'
   
     version Luna::Binary::Uploader::VERSION
   
@@ -84,7 +84,7 @@ class App
     end
 
     desc '单个上传二进制文件'
-    arg_name '1.模块名 git地址 git节点 xcode编译的缓存地址 \n 2.模块名 版本号 xcode编译的缓存地址 \n 3.模块名 本地podspec地址 xcode编译的缓存地址'
+    arg_name 'a.模块名 git地址 git节点 xcode编译的缓存地址 \n b.模块名 版本号 xcode编译的缓存地址 \n c.模块名 本地podspec地址 xcode编译的缓存地址'
     command :single do |c|
       c.action do |global_options,options,args|
         if args[3] #模式1
@@ -123,10 +123,14 @@ class App
     end
 
     desc '单个删除repo 里的podspec & 服务二进制文件'
-    arg_name '模块名 版本号'
+    arg_name '1.模块名 2.版本号'
     command :del do |c|
       c.action do |global_options,options,args|
-        Luna::Binary::Delete.new(args[0],args[1]).delete
+        if args[0] && args[1]
+          Luna::Binary::Delete.new(args[0],args[1]).delete
+        else
+          raise "缺少参数：1.模块名 2.版本号"
+        end
       end
     end
 
@@ -177,10 +181,13 @@ class App
     arg_name '1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject'
     command :build do |c|
       c.action do |global_options,options,args|
+        if args[0] && args[1]
           obj = Luna::Binary::Build.new()
           obj.workspace=args[0]
           obj.scheme=args[1]
           obj.run
+        else
+         raise "缺少参数：1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject"
       end
     end
 
@@ -188,8 +195,12 @@ class App
     arg_name '1.armPath 2.x86path'
     command :merge do |c|
       c.action do |global_options,options,args|
+        if args[0] &&  args[1]
           obj = Luna::Binary::Build.new()
           obj.mergeFrameWorks(args[0], args[1])
+        else
+          raise "缺少参数：1.armPath 2.x86path"
+        end
       end
     end
 
