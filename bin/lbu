@@ -66,9 +66,10 @@ class App
     arg_name '只接参数n, 表示不用二进制 '
     command :install do |c|
       c.action do |global_options,options,args|
-        is_open = "false"
         if args[0] && args[0] != "n"
           raise "只接参数n, 表示不用二进制"
+        elsif args[0] && args[0] == "n"
+          is_open = "false"
         else
           is_open = "true"
         end
@@ -195,6 +196,22 @@ class App
         else
           raise "缺少参数：1.armPath 2.x86path"
         end
+      end
+    end
+
+    desc 'benchmark 二进制和非二进制'
+    arg_name '1.跑工程几次 2.workspace 3.scheme 4.normal正常模式下 binary二进制模式下，不传的话都跑'
+    command :benchmark do |c|
+      c.action do |global_options,options,args|
+        obj = Luna::Binary::BenchMark.new(Integer(args[0]), args[1], args[2])
+        if args[3] == "normal"
+          obj.run_no_binary
+        elsif args[3] == "binary"
+          obj.run_binary
+        else
+          obj.run
+        end
+        obj.print
       end
     end
 
