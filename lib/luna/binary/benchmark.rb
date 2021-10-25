@@ -63,6 +63,7 @@ module Luna
                 i = 0
                 Common.instance.command("lbu install")
                 while i < times
+                    Common.instance.command("xcodebuild clean -quiet -workspace #{workspace} -scheme #{scheme} -configuration Debug")
                     t = DogTimer.new()
                     t.start
                     Common.instance.command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug")
@@ -76,6 +77,7 @@ module Luna
                 Common.instance.command("lbu install n")
                 i = 0
                 while i < times
+                    Common.instance.command("xcodebuild clean -quiet -workspace #{workspace} -scheme #{scheme} -configuration Debug")
                     t = DogTimer.new()
                     t.start
                     Common.instance.command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug")
