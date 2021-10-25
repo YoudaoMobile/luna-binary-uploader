@@ -60,21 +60,16 @@ module Luna
             end
 
             def run_binary
-                i = 0
                 Common.instance.command("lbu install")
-                while i < times
-                    Common.instance.command("xcodebuild clean -quiet -workspace #{workspace} -scheme #{scheme} -configuration Debug")
-                    t = DogTimer.new()
-                    t.start
-                    Common.instance.command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug")
-                    t.end
-                    binary_time_arr << t
-                    i = i + 1
-                end
+                run_project(binary_time_arr)
             end
 
             def run_no_binary
                 Common.instance.command("lbu install n")
+                run_project(normal_time_arr)
+            end
+
+            def run_project(arr)
                 i = 0
                 while i < times
                     Common.instance.command("xcodebuild clean -quiet -workspace #{workspace} -scheme #{scheme} -configuration Debug")
@@ -82,30 +77,26 @@ module Luna
                     t.start
                     Common.instance.command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug")
                     t.end
-                    normal_time_arr << t
+                    arr << t
                     i = i + 1
                 end
             end
 
 
             def print
-                i = 0
-                sum_time = 0
-                normal_time_arr.each { |item|
-                    item.print
-                    sum_time += item.delta
-                    i += 1
-                }
+                print_time_arr(normal_time_arr, "normal average time:")
+                print_time_arr(binary_time_arr, "binary average time:")
+            end
 
-                puts "normal average time: #{sum_time/i}" if sum_time > 0
+            def print_time_arr(time_arr, attention)
                 i = 0
                 sum_time = 0
-                binary_time_arr.each { |item|
+                time_arr.each { |item|
                     item.print
                     sum_time += item.delta
                     i += 1
                 }
-                puts "binary average time: #{sum_time/i}" if sum_time > 0
+                puts "#{attention} #{sum_time/i}" if sum_time > 0
             end
         end
 
