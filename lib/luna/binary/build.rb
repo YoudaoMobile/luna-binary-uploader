@@ -26,9 +26,7 @@ module Luna
             def createFrameworks
                 isNext = true
                 puts "请将二进制开关关闭，确保每个模块都是源码运行，因为二进制的因素有可能source缓存还是会引入二进制".yellow
-                command("rm -rf #{Dir.pwd}/Pods")
-
-                isNext = command("pod install")
+                Install.new(false)
                 Common.instance.deleteDirectory(binary_path_arm)
                 tempLunaUploaderPath = Common.instance.tempLunaUploaderPath
                 isNext = command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug -derivedDataPath '#{tempLunaUploaderPath}/build/arm/temp'") if isNext == true
