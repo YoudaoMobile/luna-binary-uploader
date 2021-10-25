@@ -188,6 +188,7 @@ class App
           obj.run
         else
          raise "缺少参数：1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject"
+        end
       end
     end
 
