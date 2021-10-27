@@ -29,13 +29,18 @@ module Luna
                             
                         end
                     else   
-                      failList << "已存在name: #{k}"
+                      failList << "已存在name: #{k} version #{v} 的framework"
                     end 
                 } 
                 puts "-=-=-=-=-=-=-=-=framework制作中-=-=-=-=-=-=-=-=-=-=".yellow
                 successList.each { |item|
-                    puts "#{item} 制作中".yellow
+                    puts "#{item.podspecName} 制作中".yellow
                     item.upload
+                }
+
+                puts "-=-=-=-=-=-=-=-=更新成功名单-=-=-=-=-=-=-=-=-=-=".yellow
+                successList.each { |item|
+                    puts "#{item.podspecName}".yellow
                 }
 
                 puts "-=-=-=-=-=-=-=-=update 失败名单-=-=-=-=-=-=-=-=-=-=".yellow if failList.length > 0
