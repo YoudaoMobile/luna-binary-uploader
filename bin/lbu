@@ -21,59 +21,28 @@ class App
     subcommand_option_handling :normal
     arguments :strict
   
-    desc 'Describe some switch here'
-    switch [:s,:switch]
-  
-    desc 'Describe some flag here'
-    default_value 'the default'
-    arg_name 'The name of the argument'
-    flag [:f,:flagname]
-  
-    desc 'Describe list here'
-    arg_name 'Describe arguments to list here'
-    command :list do |c|
-      c.desc 'Describe a switch to list'
-      c.switch :s
-  
-      c.desc 'Describe a flag to list'
-      c.default_value 'default'
-      c.flag :f
-      c.action do |global_options,options,args|
-  
-        # Your command logic here
-  
-        # If you have any errors, just raise them
-        # raise "that command made no sense"
-  
-        puts "list command ran"
-      end
-    end
-  
     desc '初始化二进制配置repo代码'
     arg_name 'url地址'
     command :init do |c|
       c.action do |global_options,options,args|
-        if args[0]
-          Luna::Binary::Init.new(args[0])
-        else
-          raise "添加url地址"
-        end
+        help_now!('url is required') if args.empty?
+        Luna::Binary::Init.new(args[0])
       end
     end
 
 
     desc '对pod install封装，一键开关二进制'
-    arg_name '只接参数n, 表示不用二进制 '
+    arg_name ''
     command :install do |c|
+      c.desc '是否需要二进制, 不需要的话 -n or --no'
+      c.switch [:n,:no]
       c.action do |global_options,options,args|
-        if args[0] && args[0] != "n"
-          raise "只接参数n, 表示不用二进制"
-        elsif args[0] && args[0] == "n"
+        if options[:no]
           is_open = "false"
         else
           is_open = "true"
         end
-        Luna::Binary::Install.new(is_open)     
+        Luna::Binary::Install.new(is_open)
       end
     end
 
@@ -120,11 +89,10 @@ class App
     arg_name '1.模块名 2.版本号'
     command :del do |c|
       c.action do |global_options,options,args|
-        if args[0] && args[1]
-          Luna::Binary::Delete.new(args[0],args[1]).delete
-        else
-          raise "缺少参数：1.模块名 2.版本号"
-        end
+        help_now!('args is required') if args.empty?
+        help_now!('模块名是需要的') if args[0] == nil
+        help_now!('版本号是需要的') if args[1] == nil
+        Luna::Binary::Delete.new(args[0],args[1]).delete
       end
     end
 
@@ -146,28 +114,31 @@ class App
     desc '仅仅更新服务的framwork，podfile带有标志位的:dev_env_use_binary的模块framework，通常解决xcode升级导致framework swift 版本问题'
     arg_name '参数:1.二进制路径(可以不传默认为当前目录下的/temp-luna-uploader/merged)'
     command :refresh do |c|
+      c.desc '是否需要build, 不需要的话 -n or --no'
+      c.switch [:n,:no]
       c.action do |global_options,options,args|
+        if options[:no]
           obj = Luna::Binary::Refresh.new()
           if args[0] != nil
-            obj.binary_path = args[0]  
+            obj.binary_path = args[0]
           else
             obj.binary_path = Luna::Binary::Common.instance.binary_path_merged
           end
           obj.run
-      end
-    end
+        else
+          help_now!('args is required') if args.empty?
+          help_now!('workspace is required') if args[0] == nil
+          help_now!('scheme is required') if args[1] == nil
+          build = Luna::Binary::Build.new()
+          build.workspace=args[0]
+          build.scheme=args[1]
+          if build.run
+            obj = Luna::Binary::Refresh.new()
+            obj.binary_path = Luna::Binary::Common.instance.binary_path_merged
+            obj.run
+          end
+        end
 
-    desc '检查并上传带有标记:dev_env_use_binary的模块，上传repo和framework'
-    arg_name '参数:1.二进制路径(可以不传默认为当前目录下的/temp-luna-uploader/merged)'
-    command :update do |c|
-      c.action do |global_options,options,args|
-          obj = Luna::Binary::Update.new()
-          if args[0] != nil
-            obj.binary_path = args[0]  
-          else
-            obj.binary_path = Luna::Binary::Common.instance.binary_path_merged
-          end
-          obj.run
       end
     end
 
@@ -175,14 +146,13 @@ class App
     arg_name '1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject'
     command :build do |c|
       c.action do |global_options,options,args|
-        if args[0] && args[1]
-          obj = Luna::Binary::Build.new()
-          obj.workspace=args[0]
-          obj.scheme=args[1]
-          obj.run
-        else
-         raise "缺少参数：1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject"
-        end
+        help_now!('args is required') if args.empty?
+        help_now!('workspace is required') if args[0] == nil
+        help_now!('scheme is required') if args[1] == nil
+        obj = Luna::Binary::Build.new()
+        obj.workspace=args[0]
+        obj.scheme=args[1]
+        obj.run
       end
     end
 
@@ -190,12 +160,11 @@ class App
     arg_name '1.armPath 2.x86path'
     command :merge do |c|
       c.action do |global_options,options,args|
-        if args[0] &&  args[1]
-          obj = Luna::Binary::Build.new()
-          obj.mergeFrameWorks(args[0], args[1])
-        else
-          raise "缺少参数：1.armPath 2.x86path"
-        end
+        help_now!('args is required') if args.empty?
+        help_now!('armPath is required') if args[0] == nil
+        help_now!('x86path is required') if args[1] == nil
+        obj = Luna::Binary::Build.new()
+        obj.mergeFrameWorks(args[0], args[1])
       end
     end
 
@@ -203,6 +172,9 @@ class App
     arg_name '1.跑工程几次 2.workspace 3.scheme 4.normal正常模式下 binary二进制模式下，不传的话都跑'
     command :benchmark do |c|
       c.action do |global_options,options,args|
+        help_now!('args is required') if args.empty?
+        help_now!('workspace is required') if args[0] == nil
+        help_now!('scheme is required') if args[1] == nil
         obj = Luna::Binary::BenchMark.new(Integer(args[0]), args[1], args[2])
         if args[3] == "normal"
           obj.run_no_binary
@@ -212,6 +184,32 @@ class App
           obj.run
         end
         obj.print
+      end
+    end
+
+    desc '二进制build完自动将podfile标记的需要二进制的，进行打包上传'
+    arg_name 'workspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject'
+    command :publish do |c|
+      c.desc '是否需要build, 不需要的话 -n or --no'
+      c.switch [:n,:no]
+      c.action do |global_options,options,args|
+        help_now!('args is required') if args.empty?
+        if options[:no]
+          update = Luna::Binary::Update.new()
+          update.binary_path = Luna::Binary::Common.instance.binary_path_merged
+          update.run
+        else
+          help_now!('workspace is required') if args[0] == nil
+          help_now!('scheme is required') if args[1] == nil
+          build = Luna::Binary::Build.new()
+          build.workspace=args[0]
+          build.scheme=args[1]
+          if build.run
+            update = Luna::Binary::Update.new()
+            update.binary_path = Luna::Binary::Common.instance.binary_path_merged
+            update.run
+          end
+        end
       end
     end
 

@@ -16,7 +16,7 @@ module Luna
             end
 
             def run 
-                createFrameworks
+                return createFrameworks
             end
 
             def command(c)
@@ -35,6 +35,7 @@ module Luna
                 isNext = command("xcodebuild -workspace #{workspace} -scheme #{scheme} -configuration Debug -derivedDataPath '#{tempLunaUploaderPath}/build/x86/temp' -destination 'platform=iOS Simulator,name=iPhone 11'") if isNext == true
                 isNext = command("cp -r #{tempLunaUploaderPath}/build/x86/temp/Build/Products/Debug-iphonesimulator #{binary_path_x86}") if isNext == true
                 mergeFrameWorks(binary_path_arm, binary_path_x86) if isNext == true
+                return isNext
             end
     
             def mergeFrameWorks(binary_path_arm, binary_path_x86)
