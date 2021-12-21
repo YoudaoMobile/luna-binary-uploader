@@ -193,10 +193,13 @@ class App
       c.desc '是否需要build, 不需要的话 -n or --no'
       c.switch [:n,:no]
       c.action do |global_options,options,args|
-        help_now!('args is required') if args.empty?
         if options[:no]
           update = Luna::Binary::Update.new()
-          update.binary_path = Luna::Binary::Common.instance.binary_path_merged
+          if args[0] != nil
+            update.binary_path = args[0]
+          else
+            update.binary_path = Luna::Binary::Common.instance.binary_path_merged
+          end
           update.run
         else
           help_now!('workspace is required') if args[0] == nil
