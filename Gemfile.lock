@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    luna-binary-uploader (0.1.25)
+    luna-binary-uploader (0.1.26)
       cocoapods
       cocoapods-generate (~> 2.0.1)
       cocoapods-imy-bin (= 0.3.1.3)
