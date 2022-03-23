@@ -192,6 +192,7 @@ class App
     command :publish do |c|
       c.desc '是否需要build, 不需要的话 -n or --no'
       c.switch [:n,:no]
+      c.switch [:q,:quick]
       c.action do |global_options,options,args|
         if options[:no]
           update = Luna::Binary::Update.new()
@@ -207,6 +208,9 @@ class App
           build = Luna::Binary::Build.new()
           build.workspace=args[0]
           build.scheme=args[1]
+          if options[:quick]
+            build.needPodInstall = false
+          end
           if build.run
             update = Luna::Binary::Update.new()
             update.binary_path = Luna::Binary::Common.instance.binary_path_merged
