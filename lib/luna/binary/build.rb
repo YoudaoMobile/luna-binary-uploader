@@ -27,7 +27,10 @@ module Luna
             def createFrameworks
                 isNext = true
                 if needPodInstall
+                    puts "强制使用源码重新pod install".yellow
                     Install.new(false)
+                else
+                    puts "跳过重新pod install的步骤".yellow
                 end
                 Common.instance.deleteDirectory(binary_path_arm)
                 tempLunaUploaderPath = Common.instance.tempLunaUploaderPath
