@@ -25,8 +25,12 @@ class App
     arg_name 'url地址'
     command :init do |c|
       c.action do |global_options,options,args|
-        help_now!('url is required') if args.empty?
-        Luna::Binary::Init.new(args[0])
+        # help_now!('url is required') if args.empty?
+        templateFileUrl = 'http://ydlunacommon-cdn.nosdn.127.net/38cb10ff0440170ca11d93d02e4ed562.yml'
+        if args.count > 0
+          templateFileUrl = args[0]
+        end
+        Luna::Binary::Init.new(templateFileUrl)
       end
     end
 
@@ -49,13 +53,15 @@ class App
     desc '单个上传二进制文件'
     arg_name 'a.模块名 git地址 git节点 xcode编译的缓存地址 \n b.模块名 版本号 xcode编译的缓存地址 \n c.模块名 本地podspec地址 xcode编译的缓存地址'
     command :single do |c|
+      c.desc '强制上传 -f or --force'
+      c.switch [:f,:force]
       c.action do |global_options,options,args|
         if args[3] #模式1
           Luna::Binary::Uploader::SingleUploader.new(args[0],args[1],args[2], args[3]).upload
         else 
           moduleName = args[0]
           args1 = args[1]
-          binaryPath= args[2]
+          binaryPath= args[2] != nil ? args[2] : Luna::Binary::Common.instance.binary_path_merged
           version = args1
           if File.exist?(args1)
             spec = Pod::Specification.from_file(Pathname.new(args1))
@@ -70,6 +76,11 @@ class App
                     spec = Pod::Specification.from_file(pathArr.first)
                     uploader = Luna::Binary::Uploader::SingleUploader.new(moduleName, "", "", binaryPath)
                     uploader.specification=spec
+                    if options[:force]
+                      puts '先删除现有的: ' + moduleName + " " + version
+                      uploader.refresh_specification_work
+                      Luna::Binary::Delete.new(moduleName, version).delete
+                    end
                     uploader.upload
                 else 
                   raise "没有找到#{moduleName}"
@@ -116,8 +127,9 @@ class App
     command :refresh do |c|
       c.desc '是否需要build, 不需要的话 -n or --no'
       c.switch [:n,:no]
+      c.desc '是否快速执行, -q or --quick 开启后将不会重新执行pod install'
       c.switch [:q,:quick]
-      c.action do |global_options,options,args|
+      c.action do |global_options, options, args|
         if options[:no]
           obj = Luna::Binary::Refresh.new()
           if args[0] != nil
@@ -127,16 +139,7 @@ class App
           end
           obj.run
         else
-          help_now!('args is required') if args.empty?
-          help_now!('workspace is required') if args[0] == nil
-          help_now!('scheme is required') if args[1] == nil
-          build = Luna::Binary::Build.new()
-          build.workspace=args[0]
-          build.scheme=args[1]
-          if options[:quick]
-            build.needPodInstall = false
-          end
-          if build.run
+          if build(global_options, options, args)
             obj = Luna::Binary::Refresh.new()
             obj.binary_path = Luna::Binary::Common.instance.binary_path_merged
             obj.run
@@ -146,21 +149,26 @@ class App
       end
     end
 
+    def self.build(global_options, options, args)
+      workspace = args[0] != nil ? args[0] : Luna::Binary::Common.instance.bin_dev['workspace']  
+      scheme = args[1] != nil ? args[1] : Luna::Binary::Common.instance.bin_dev['scheme']
+      help_now!('workspace is required and no config in bin_config.yml') if workspace == nil
+      help_now!('scheme is required and no config in bin_config.yml') if scheme == nil
+      build = Luna::Binary::Build.new()
+      build.workspace = workspace 
+      build.scheme = scheme
+      if options[:quick]
+        build.needPodInstall = false
+      end
+      build.run
+    end
+
     desc 'build项目并合成带有arm64&x86的framework'
     arg_name '1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject'
     command :build do |c|
       c.switch [:q,:quick]
-      c.action do |global_options,options,args|
-        help_now!('args is required') if args.empty?
-        help_now!('workspace is required') if args[0] == nil
-        help_now!('scheme is required') if args[1] == nil
-        obj = Luna::Binary::Build.new()
-        obj.workspace=args[0]
-        obj.scheme=args[1]
-        if options[:quick]
-          build.needPodInstall = false
-        end
-        obj.run
+      c.action do |global_options, options, args|
+        build(global_options, options, args)
       end
     end
 

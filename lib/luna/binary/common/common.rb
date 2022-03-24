@@ -221,7 +221,7 @@ module Luna
 
           def bin_dev
             if @bin_dev == nil
-              @bin_dev = YAML.load_file("#{Pod::Config.instance.home_dir}/bin_dev.yml")
+              @bin_dev = YAML.load_file("./bin_config.yml")
             end
             return @bin_dev
           end
