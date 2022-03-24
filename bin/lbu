@@ -116,6 +116,7 @@ class App
     command :refresh do |c|
       c.desc '是否需要build, 不需要的话 -n or --no'
       c.switch [:n,:no]
+      c.switch [:q,:quick]
       c.action do |global_options,options,args|
         if options[:no]
           obj = Luna::Binary::Refresh.new()
@@ -132,6 +133,9 @@ class App
           build = Luna::Binary::Build.new()
           build.workspace=args[0]
           build.scheme=args[1]
+          if options[:quick]
+            build.needPodInstall = false
+          end
           if build.run
             obj = Luna::Binary::Refresh.new()
             obj.binary_path = Luna::Binary::Common.instance.binary_path_merged
@@ -145,6 +149,7 @@ class App
     desc 'build项目并合成带有arm64&x86的framework'
     arg_name '1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject'
     command :build do |c|
+      c.switch [:q,:quick]
       c.action do |global_options,options,args|
         help_now!('args is required') if args.empty?
         help_now!('workspace is required') if args[0] == nil
@@ -152,6 +157,9 @@ class App
         obj = Luna::Binary::Build.new()
         obj.workspace=args[0]
         obj.scheme=args[1]
+        if options[:quick]
+          build.needPodInstall = false
+        end
         obj.run
       end
     end
