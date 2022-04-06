@@ -159,6 +159,8 @@ class App
       build.scheme = scheme
       if options[:quick]
         build.needPodInstall = false
+      else
+        build.needPodInstall = true
       end
       build.run
     end
@@ -219,15 +221,7 @@ class App
           end
           update.run
         else
-          help_now!('workspace is required') if args[0] == nil
-          help_now!('scheme is required') if args[1] == nil
-          build = Luna::Binary::Build.new()
-          build.workspace=args[0]
-          build.scheme=args[1]
-          if options[:quick]
-            build.needPodInstall = false
-          end
-          if build.run
+          if build(global_options, options, args)
             update = Luna::Binary::Update.new()
             update.binary_path = Luna::Binary::Common.instance.binary_path_merged
             update.run
