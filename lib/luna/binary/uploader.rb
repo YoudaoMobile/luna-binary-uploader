@@ -37,7 +37,6 @@ module Luna
         end
 
         def upload
-          specificationWork
           push
         end
 
@@ -72,14 +71,26 @@ module Luna
           
           ensure
             download_git
-            
-            if isHasSpecInRepo == false && isHasFrameworkInService == false
-              @spec = createFrameworkSpec
-              write_spec_file(@spec)
-            else
+
+            if local_path != nil
+              localSpecUpVersion
+            elsif isHasSpecInRepo == true || isHasFrameworkInService == true
               raise "已存在repo or 二进制服务 #{specification.name} #{specification.version}"
             end
+
+
+            @spec = createFrameworkSpec
+            write_spec_file(@spec)
           end
+        end
+
+        def localSpecUpVersion
+          nowTime = Time.now
+          timeStamp = "#{nowTime.year}-#{nowTime.month}-#{nowTime.day}"
+          command("git stash save '#{timeStamp}'")
+          specification.version = Util.writeVersionUp(local_path, specification.version)
+          branchName = "lbu-#{timeStamp}"
+          command("git checkout -b #{branchName};git pull origin #{branchName};git add #{local_path};git commit -m 'Mod: 修改版本号为:#{specification.version.to_s} by LBU';git push -f origin #{branchName}")
         end
 
         def refresh_specification_work

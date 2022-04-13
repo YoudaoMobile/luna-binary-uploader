@@ -77,7 +77,7 @@ module Luna
             end
 
             def command(c)
-              p c
+              puts c.yellow
               return system c
             end
             
