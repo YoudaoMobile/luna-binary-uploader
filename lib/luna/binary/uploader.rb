@@ -87,10 +87,14 @@ module Luna
         def localSpecUpVersion
           nowTime = Time.now
           timeStamp = "#{nowTime.year}-#{nowTime.month}-#{nowTime.day}"
-          command("git stash save '#{timeStamp}'")
           specification.version = Util.writeVersionUp(local_path, specification.version)
           branchName = "lbu-#{timeStamp}"
-          command("git checkout -b #{branchName};git pull origin #{branchName};git add #{local_path};git commit -m 'Mod: 修改版本号为:#{specification.version.to_s} by LBU';git push -f origin #{branchName}")
+          command("git checkout -b #{branchName}")
+          # 保证最新节点防止push不上去
+          command("git pull origin #{branchName}")
+          command("git add #{local_path};")
+          command("git commit -m 'Mod: 修改版本号为:#{specification.version.to_s} by LBU';")
+          command("git push -f origin #{branchName}")
         end
 
         def refresh_specification_work

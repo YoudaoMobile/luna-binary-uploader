@@ -76,9 +76,9 @@ module Luna
               @podFilePath = Pathname.new(result.strip! + "/Podfile.lock")
             end
 
-            def command(c)
-              puts c.yellow
-              return system c
+            def command(commandStr)
+              puts commandStr.yellow
+              return system commandStr
             end
             
             def findLintPodspec(moduleName)
