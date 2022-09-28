@@ -168,6 +168,7 @@ class App
     desc 'build项目并合成带有arm64&x86的framework'
     arg_name '1.xcworkspace 名称 eg:MyWorkSpace.xcworkspace 2.scheme eg: MyProject'
     command :build do |c|
+      c.desc '是否快速执行, -q or --quick 开启后将不会重新执行pod install'
       c.switch [:q,:quick]
       c.action do |global_options, options, args|
         build(global_options, options, args)
@@ -210,6 +211,7 @@ class App
     command :publish do |c|
       c.desc '是否需要build, 不需要的话 -n or --no'
       c.switch [:n,:no]
+      c.desc '是否快速执行, -q or --quick 开启后将不会重新执行pod install'
       c.switch [:q,:quick]
       c.action do |global_options,options,args|
         if options[:no]

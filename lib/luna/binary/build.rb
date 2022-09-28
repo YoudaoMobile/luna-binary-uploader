@@ -5,6 +5,7 @@ require 'cocoapods-imy-bin/config/config'
 require 'cocoapods-imy-bin'
 require 'json'
 require 'luna/binary/common/common'
+require 'luna/binary/util/file_processer'
 
 module Luna
     module Binary
@@ -89,6 +90,15 @@ module Luna
             def mergeFrameWork(moduleName, path1, path2)
                 command("mkdir -p #{binary_path_merged}; cp -r #{File.dirname(path1)} #{binary_path_merged}; cp -r #{File.dirname(path2)} #{binary_path_merged}; mv #{binary_path_merged}/#{File.basename(File.dirname(path1))} #{binary_path_merged}/#{moduleName};")
                 framework_name = moduleName.gsub("-", "_")
+
+                # 修复Xcode14编译出来的framework里的header写死了x86判断的问题
+                FileProcesserManager.new("#{binary_path_merged}/#{moduleName}/#{framework_name}.framework/Headers/*", 
+                [
+                    FileProcesser.new(-> (fileContent) {
+                        return fileContent.sub( "#elif defined(__x86_64__) && __x86_64__", "#elif (defined(__x86_64__) && __x86_64__) || (defined(__arm64__) && __arm64__)" )
+                    })
+                ]).process()
+
                 return command("lipo -create #{path2}/#{framework_name} #{path1}/#{framework_name} -output #{binary_path_merged}/#{moduleName}/#{framework_name}.framework/#{framework_name}")
             end
     
