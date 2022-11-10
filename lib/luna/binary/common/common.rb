@@ -109,12 +109,20 @@ module Luna
           end
           
           def createNeedFrameworkMapper
+              if lockfile == nil
+                puts "LUNA.Binary.Common.createNeedFrameworkMapper() lockfile为空，不合法，需要设置lockfile"
+              end
               spec_repo_binary = {}
               puts "二进制repo地址 : #{Common.instance.binary_repo_url}".yellow
               use_framework_list.each { |item|
                   name = item.split('/').first
                   if spec_repo_binary[name] == nil
-                      spec_repo_binary[name] = lockfile.version(name).version
+                      versionInfo = lockfile.version(name)
+                      if versionInfo != nil
+                        spec_repo_binary[name] = versionInfo.version
+                      else
+                        puts "错误，没找在podlock里找到对应库的版本号: " + name
+                      end
                   end
               }    
               p "use_framework_list: #{spec_repo_binary}"
